@@ -53,10 +53,10 @@ def PID(pid_input_parameters):  # [kp,ki,kd, setpoint, currentpoint, old_error, 
 
 def Mixer(P_cmd, Roll_cmd, Pitch_cmd, Yaw_cmd, w):
     # mixing commands for quadcopter
-    w[0] = saturation(P_cmd - Yaw_cmd + Roll_cmd + Pitch_cmd, 10000, 0)
-    w[1] = saturation(P_cmd + Yaw_cmd - Roll_cmd + Pitch_cmd, 10000, 0)
-    w[2] = saturation(P_cmd - Yaw_cmd - Roll_cmd - Pitch_cmd, 10000, 0)
-    w[3] = saturation(P_cmd + Yaw_cmd + Roll_cmd - Pitch_cmd, 10000, 0)
+    w[0] = saturation(P_cmd - Yaw_cmd + Roll_cmd + Pitch_cmd, 20000, 0)
+    w[1] = saturation(P_cmd + Yaw_cmd - Roll_cmd + Pitch_cmd, 20000, 0)
+    w[2] = saturation(P_cmd - Yaw_cmd - Roll_cmd - Pitch_cmd, 20000, 0)
+    w[3] = saturation(P_cmd + Yaw_cmd + Roll_cmd - Pitch_cmd, 20000, 0)
 
 
 def PhysModel(P_des, Wx_des, Wy_des, Wz_des, Timelapse, dt):
