@@ -29,7 +29,7 @@ However, with the Z axis, everything is more complicated. There are important di
         Ay = (M0 + M3 - M1 - M2) / inert  # calculate Y axis acceleration
         Wy_cur += Ay * dt  # calculate Y axis angle speed
         
-         Az = Mz / inert  # calculate Z axis acceleration
+        Az = Mz / inert  # calculate Z axis acceleration
         Wz_cur += Az * dt  # calculate Z axis angle speed
         
 Angular acceleration we can find like Moment/inertia moment. Because we write discret system we have sampling frequency that we called dt, so we can
