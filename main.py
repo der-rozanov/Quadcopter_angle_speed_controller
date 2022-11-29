@@ -23,7 +23,7 @@ Wz_des = 0.1
 # -------------------------------------
 
 
-def saturation(var, max, min):
+def Saturation(var, max, min):
     if var > max:
         return max
     elif var < min:
@@ -35,17 +35,17 @@ def saturation(var, max, min):
 def PID(pid_input_parameters):  # [kp,ki,kd, setpoint, currentpoint, old_error, sum_error,dt]
 
     # variables definition
-    kp = pid_input_parameters[0]
-    ki = pid_input_parameters[1]
-    kd = pid_input_parameters[2]
-    setpoint = pid_input_parameters[3]
-    currentpoint = pid_input_parameters[4]
+    kp = pid_input_parameters[0]  # PID Proportional parameter
+    ki = pid_input_parameters[1]  # PID Integral parameter
+    kd = pid_input_parameters[2]  # PID derivative parameter
+    set_point = pid_input_parameters[3]
+    current_point = pid_input_parameters[4]
     old_error = pid_input_parameters[5]
     sum_error = pid_input_parameters[6]
     dt = pid_input_parameters[7]
 
     # calculate PID impact
-    error = setpoint - currentpoint
+    error = set_point - current_point
     impact = kp * error + kd * ((error - old_error) / dt) + ki * sum_error
 
     return impact
@@ -53,15 +53,15 @@ def PID(pid_input_parameters):  # [kp,ki,kd, setpoint, currentpoint, old_error, 
 
 def Mixer(P_cmd, Roll_cmd, Pitch_cmd, Yaw_cmd, w):
     # mixing commands for quadcopter
-    w[0] = saturation(P_cmd - Yaw_cmd + Roll_cmd + Pitch_cmd, 20000, 0)
-    w[1] = saturation(P_cmd + Yaw_cmd - Roll_cmd + Pitch_cmd, 20000, 0)
-    w[2] = saturation(P_cmd - Yaw_cmd - Roll_cmd - Pitch_cmd, 20000, 0)
-    w[3] = saturation(P_cmd + Yaw_cmd + Roll_cmd - Pitch_cmd, 20000, 0)
+    w[0] = Saturation(P_cmd - Yaw_cmd + Roll_cmd + Pitch_cmd, 20000, 0)
+    w[1] = Saturation(P_cmd + Yaw_cmd - Roll_cmd + Pitch_cmd, 20000, 0)
+    w[2] = Saturation(P_cmd - Yaw_cmd - Roll_cmd - Pitch_cmd, 20000, 0)
+    w[3] = Saturation(P_cmd + Yaw_cmd + Roll_cmd - Pitch_cmd, 20000, 0)
 
 
 def PhysModel(P_des, Wx_des, Wy_des, Wz_des, Timelapse, dt):
     w = [0, 0, 0, 0]
-    Motors_data = [[], [], [], []]
+    motors_data = [[], [], [], []]
     time = 0.0
 
     Wx = []
@@ -82,15 +82,15 @@ def PhysModel(P_des, Wx_des, Wy_des, Wz_des, Timelapse, dt):
     while time < Timelapse:
         Wx_input_parameters = [100, 0.001, 0.1, Wx_des, Wx_cur, Wx_old_error, Wx_sum_error, dt]
         Wx_impact = PID(Wx_input_parameters)  # calculate X axis impact
-        Pitch_cmd = saturation(Wx_impact, 500, 0)
+        Pitch_cmd = Saturation(Wx_impact, 500, 0)
 
         Wy_input_parameters = [100, 0.001, 0.1, Wy_des, Wy_cur, Wy_old_error, Wy_sum_error, dt]
         Wy_impact = PID(Wy_input_parameters)  # calculate Y axis impact
-        Roll_cmd = saturation(Wy_impact, 500, 0)
+        Roll_cmd = Saturation(Wy_impact, 500, 0)
 
         Wz_input_parameters = [500, 1, 1, Wz_des, Wz_cur, Wz_old_error, Wz_sum_error, dt]
         Wz_impact = PID(Wz_input_parameters)  # calculate Z axis impact
-        Yaw_cmd = saturation(Wz_impact, 10, -10)
+        Yaw_cmd = Saturation(Wz_impact, 10, -10)
 
         Mixer(P_des, Roll_cmd, Pitch_cmd, Yaw_cmd, w)  # do command mix
 
@@ -117,20 +117,20 @@ def PhysModel(P_des, Wx_des, Wy_des, Wz_des, Timelapse, dt):
 
         time += dt  # next time step
 
-        Motors_data[0].append(w[0] * 100)  # write motors data
-        Motors_data[1].append(w[1] * 100)
-        Motors_data[2].append(w[2] * 100)
-        Motors_data[3].append(w[3] * 100)
+        motors_data[0].append(w[0] * 100)  # write motors data
+        motors_data[1].append(w[1] * 100)
+        motors_data[2].append(w[2] * 100)
+        motors_data[3].append(w[3] * 100)
 
-        Wx.append(Wx_cur * 57.3)  # write angels speed data
+        Wx.append(Wx_cur * 57.3)  # write angels speed data * 57.3 like degrees
         Wy.append(Wy_cur * 57.3)
         Wz.append(Wz_cur * 57.3)
 
-    return [Wx, Wy, Wz, Motors_data]  # this is proc output, that we will draw or analyse
+    return [Wx, Wy, Wz, motors_data]  # this is proc output, that we will draw or analyse
 
 
 if __name__ == '__main__':
-    arr = PhysModel(P_des,Wx_des,Wy_des,Wz_des, Timelapse, dt)
+    arr = PhysModel(P_des, Wx_des, Wy_des, Wz_des, Timelapse, dt)
 
     Wx = np.array(arr[0])
     Wy = np.array(arr[1])
